@@ -1,0 +1,52 @@
+# 独立项目，不启动新的公网代理，不操作 tk 项目的数据库或卷。
+name: cjpractice15
+services:
+  practice-db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-practice}
+      POSTGRES_USER: ${POSTGRES_USER:-practice}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?请先在 .env 配置数据库密码}
+    volumes:
+      - practice_data:/var/lib/postgresql/data
+    networks:
+      - private
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+  practice-app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      APP_ENV: production
+      POSTGRES_HOST: practice-db
+      POSTGRES_DB: ${POSTGRES_DB:-practice}
+      POSTGRES_USER: ${POSTGRES_USER:-practice}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      ALLOWED_HOSTS: ${DOMAIN:?请配置题库域名}
+      CSRF_TRUSTED_ORIGINS: https://${DOMAIN}
+    command: ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--timeout", "60", "--access-logfile", "-", "--error-logfile", "-"]
+    depends_on:
+      practice-db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:18080:8000"
+    volumes:
+      - practice_static:/app/staticfiles
+    networks:
+      private:
+      existing_proxy:
+        aliases:
+          - cjpractice15-app
+volumes:
+  practice_data:
+  practice_static:
+networks:
+  private:
+  existing_proxy:
+    external: true
+    name: ${CADDY_NETWORK:?请填写 tk-web-1 实际所在的 Docker 网络名称}

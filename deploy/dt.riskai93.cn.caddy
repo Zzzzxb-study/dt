@@ -1,0 +1,5 @@
+# 仅作为新增站点片段；不要覆盖现有主 Caddyfile。
+dt.riskai93.cn {
+    encode zstd gzip
+    reverse_proxy cjpractice15-app:8000
+}

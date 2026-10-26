@@ -1,0 +1,167 @@
+{
+  "generated_at": "2026-10-26T12:27:57.392222+00:00",
+  "parser_library": "pypdf 6.21.2",
+  "total": 1511,
+  "enabled": 1506,
+  "sources": [
+    {
+      "source_file": "长江财险成立15周年职工专业技能大赛题库（健康险条线）.pdf",
+      "total": 201,
+      "enabled": 200,
+      "kinds": {
+        "single": 120,
+        "boolean": 50,
+        "multiple": 21,
+        "short": 10
+      },
+      "pdf_pages": 79,
+      "declared_or_section_total": 200,
+      "count_difference": 1,
+      "sha256": "406eb1dd4ba173a101202d6a7cdbfd84eb65f96f873617c0022587c8d9157ec0"
+    },
+    {
+      "source_file": "长江财险成立15周年职工专业技能大赛题库（农险条线）.pdf",
+      "total": 200,
+      "enabled": 200,
+      "kinds": {
+        "single": 120,
+        "boolean": 50,
+        "multiple": 20,
+        "short": 10
+      },
+      "pdf_pages": 36,
+      "declared_or_section_total": 200,
+      "count_difference": 0,
+      "sha256": "0c9c8b7819208ea1997d1fe123c3e25a64c4bbfbf970cee6030f60d9d5bfe9d4"
+    },
+    {
+      "source_file": "长江财险成立15周年职工专业技能大赛题库（车险条线）/长江财险成立15周年职工专业技能大赛题库（车险承保部分）.pdf",
+      "total": 210,
+      "enabled": 208,
+      "kinds": {
+        "single": 100,
+        "multiple": 30,
+        "boolean": 70,
+        "short": 10
+      },
+      "pdf_pages": 33,
+      "declared_or_section_total": 210,
+      "count_difference": 0,
+      "sha256": "f1f15935793ce0bc8b9a5e0d89e1e57da1bd5953d78c1f3fbbad88b830b352ea"
+    },
+    {
+      "source_file": "长江财险成立15周年职工专业技能大赛题库（车险条线）/长江财险成立15周年职工专业技能大赛题库（车险理赔部分）.pdf",
+      "total": 600,
+      "enabled": 598,
+      "kinds": {
+        "single": 300,
+        "multiple": 70,
+        "boolean": 200,
+        "short": 30
+      },
+      "pdf_pages": 87,
+      "declared_or_section_total": 600,
+      "count_difference": 0,
+      "sha256": "85d6a577fb8cae48adf82509ced9d3f1d72b535e7844c25f0759ced896fbf1e6"
+    },
+    {
+      "source_file": "长江财险成立15周年职工专业技能大赛题库（非车险条线）.pdf",
+      "total": 300,
+      "enabled": 300,
+      "kinds": {
+        "single": 150,
+        "boolean": 100,
+        "multiple": 35,
+        "short": 15
+      },
+      "pdf_pages": 69,
+      "declared_or_section_total": 300,
+      "count_difference": 0,
+      "sha256": "c6b59e025ad5b02f3bd58badfd02d1ccb143fd48ae5edfd121af70656fc35d30"
+    }
+  ],
+  "issue_counts": {
+    "duplicate_source_number": 1,
+    "answer_option_missing": 1,
+    "duplicate_option_label": 1,
+    "missing_answer": 1,
+    "missing_reference": 2
+  },
+  "anomalies": [
+    {
+      "uid": "76d4acd35452a053b43a5ecd93c0fbe55849f9a4199c6568f9c1146b8a43ed40",
+      "source_file": "长江财险成立15周年职工专业技能大赛题库（健康险条线）.pdf",
+      "kind": "multiple",
+      "source_number": "2#duplicate",
+      "source_page": 65,
+      "issues": [
+        "duplicate_source_number"
+      ],
+      "stem": "客户投保短期百万医疗险，体检提示甲状腺结节\nTI-RADS 3 类，下列哪些信息会提升核保风险等级（）"
+    },
+    {
+      "uid": "bc925a4f0c4563e7552d35fa9695d15988c72b3943f07912d5b6c1ca5d73f687",
+      "source_file": "长江财险成立15周年职工专业技能大赛题库（车险条线）/长江财险成立15周年职工专业技能大赛题库（车险承保部分）.pdf",
+      "kind": "multiple",
+      "source_number": "13",
+      "source_page": 21,
+      "issues": [
+        "answer_option_missing",
+        "duplicate_option_label"
+      ],
+      "stem": "以下车型中零整比高的有（ ）。"
+    },
+    {
+      "uid": "de599c31130ef9f22f696f6633d5fe83d60ca0c82df7651791e47d203c59eefd",
+      "source_file": "长江财险成立15周年职工专业技能大赛题库（车险条线）/长江财险成立15周年职工专业技能大赛题库（车险承保部分）.pdf",
+      "kind": "boolean",
+      "source_number": "29",
+      "source_page": 28,
+      "issues": [
+        "missing_answer"
+      ],
+      "stem": "变更随车因素、使用性质、客户类型及所属性质的，需提供批改\n申请书、行驶证、投保人身份证明。"
+    },
+    {
+      "uid": "20fd57a0af9f2605a40db0de67ca3cf7446607e692eb12793a9767e7ae5805e7",
+      "source_file": "长江财险成立15周年职工专业技能大赛题库（车险条线）/长江财险成立15周年职工专业技能大赛题库（车险理赔部分）.pdf",
+      "kind": "short",
+      "source_number": "571",
+      "source_page": 83,
+      "issues": [
+        "missing_reference"
+      ],
+      "stem": "我司承保的车险案件，第三者张某因事故受伤，经查勘，属于保\n险责任，张某诊断为：右手拇指近节缺损、右手食指中节缺损、右手中\n支末节缺损、右手无名指末节缺损，请计算右手功能丧失多少？明确计\n算过程；依据《人身保险伤残评定标准》，构成几级伤残？（10分）"
+    },
+    {
+      "uid": "b42c0007e112e1c5a5678bea3016026698d55e034367e3818973b2db42af7c64",
+      "source_file": "长江财险成立15周年职工专业技能大赛题库（车险条线）/长江财险成立15周年职工专业技能大赛题库（车险理赔部分）.pdf",
+      "kind": "short",
+      "source_number": "572",
+      "source_page": 83,
+      "issues": [
+        "missing_reference"
+      ],
+      "stem": "我司承保标的车于2022 年02月15日出险，造成三者付某（出生\n年月：1972-08-27）死亡，死者父母健在，父亲（1947-10-06），母亲\n（1951-02-11），死者有一姐姐，与妻子生育两子女，其子（2005-10-\n03），其女（2002-06-17），当地2002 年度人均可支配收入 39791\n元，城镇居民人均年消费支出 24192元，请计算被扶养人生活费。（20\n分）"
+    }
+  ],
+  "content_audit": {
+    "unique_ids": 1511,
+    "enabled_answer_leaks": 0,
+    "enabled_empty_stems": 0,
+    "source_checks": [
+      "完整提取5份PDF共304页，按题型标题、编号序列与正文边界核对。",
+      "非车险检索健康险、健康保险、重疾险、重大疾病保险、医疗保险、疾病保险等专属题干词，未发现需改归健康险的题目；雇主责任险、团体意外险仍归非车险。",
+      "核对无标点答案、嵌入括号答案、内嵌选项、无空格选项、分行选项及解析中的数字条目。"
+    ]
+  },
+  "observations": [
+    "健康险原卷声明200题，但多选题第15与第16题之间额外印有一道编号2的独立题，实际201题；额外题保留原文并隔离，source_number加#duplicate防止覆盖。",
+    "车险承保多选第25、26、28题的原文仅给出一个选项答案，按原卷多选分组保留，允许只勾选一个答案。",
+    "健康险单选第86题答案C之后有E开头的说明段，按原文位置保留为答案后说明，未擅自改写为第五个选项。"
+  ],
+  "limitations": [
+    "答案仅忠实转录源题库，未验证法规及业务口径的现行有效性。",
+    "保留源文件分类，雇主责任险及团体意外险不因出现健康术语而改归健康险。"
+  ]
+}

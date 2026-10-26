@@ -1,0 +1,12 @@
+.git
+.deps
+.venv
+__pycache__
+**/__pycache__
+*.sqlite3
+.env
+tmp
+staticfiles
+backups
+.local-*
+.playwright-mcp
