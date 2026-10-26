@@ -54,6 +54,8 @@ sudo docker compose -f compose.existing-caddy.yaml build --build-arg PIP_INDEX_U
 
 ## 新增 Caddy 站点
 
+已确认本例挂载为 `/home/ubuntu/TK/deploy/Caddyfile -> /etc/caddy/Caddyfile` 后，可以执行 `sudo python3 tools/connect_domain.py --apply`。该工具会核对实际挂载、共享网络、容器别名及同域名配置；先通过 stdin 校验候选配置，后生成 600 权限备份、保持原文件 inode 写入并平滑重载。校验失败不写文件，重载失败恢复原文件并尝试重新加载原配置。只适用于本项目已确认的服务器路径和容器名称；不输出原配置内容或密钥。
+
 先确定旧 Caddy 的实际配置入口、挂载方式及是否使用通配域名路由。备份现有配置后，将 `deploy/dt.riskai93.cn.caddy` 的站点段新增到正确位置；不要直接覆盖旧文件。已有同域名或通配规则时先检查路由关系，不重复添加。
 
 如果已确认入口是容器内 `/etc/caddy/Caddyfile`，可以用下列命令先校验、后平滑重载：
