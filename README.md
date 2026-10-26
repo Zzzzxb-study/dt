@@ -87,6 +87,8 @@ docker compose up -d
 
 Caddy 自动申请 HTTPS 证书；需要域名有效解析及 80/443 可从公网访问。应用与数据库不直接映射到公网端口。应用使用非 root 用户；数据库和证书采用命名卷持久化。不要执行 `docker compose down -v`，该命令会删除数据库卷。
 
+若构建时访问官方 PyPI 不稳定，可添加 `--build-arg PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple` 使用清华 HTTPS 镜像。Dockerfile 保留固定版本，设置下载超时和重试；不关闭证书校验。现有 Caddy 方案的完整命令见 `deploy/复用现有Caddy.md`。
+
 登录限制采用数据库记录：单账号连续失败 5 次或同一连接地址 40 次后，在 15 分钟窗口内限制登录。反向代理默认情况下连接地址是代理地址，40 次为共享保护阈值；大量同时使用时应在受控代理层补充按真实 IP 的限流，不信任浏览器传入的转发头。
 
 升级：先备份，再上传代码，`docker compose build`、`docker compose run --rm web python manage.py migrate`、`docker compose run --rm web python manage.py collectstatic --noinput`、`docker compose up -d`。仅有新增题时运行默认导入；覆盖题目请先审阅报告。

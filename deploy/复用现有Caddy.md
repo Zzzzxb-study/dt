@@ -42,6 +42,16 @@ sudo docker compose -f compose.existing-caddy.yaml up -d
 
 管理员密码在服务器提示中交互输入，不在聊天中发送。
 
+### Python 下载源连接不稳定
+
+如果镜像构建在 `pip install` 阶段报 `from versions: none`，先检查失败的固定版本是否存在，不直接降级依赖。`sqlparse==0.6.0` 已核对官方 PyPI 和清华镜像，并成功从清华镜像下载。Dockerfile 支持通过构建参数切换 HTTPS 下载源，同时设置 60 秒超时和 5 次网络重试：
+
+```sh
+sudo docker compose -f compose.existing-caddy.yaml build --build-arg PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
+```
+
+此设置只影响新应用镜像构建，不修改服务器全局 pip 配置。保留依赖固定版本和 TLS 校验，不使用 `--trusted-host` 或 HTTP 源。若服务器通过压缩包安装而没有 `.git`，可单独下载更新后的 Dockerfile，再重新构建；不覆盖 `.env`，不重新运行配置生成器。
+
 ## 新增 Caddy 站点
 
 先确定旧 Caddy 的实际配置入口、挂载方式及是否使用通配域名路由。备份现有配置后，将 `deploy/dt.riskai93.cn.caddy` 的站点段新增到正确位置；不要直接覆盖旧文件。已有同域名或通配规则时先检查路由关系，不重复添加。
