@@ -4,7 +4,7 @@ from django.db import models
 
 CATEGORIES = [('auto', '车险'), ('nonauto', '非车险'), ('health', '健康险'), ('agri', '农险')]
 KINDS = [('single', '单选题'), ('multiple', '多选题'), ('boolean', '判断题'), ('short', '简答题')]
-MODES = [('sequential', '顺序练习'), ('random', '随机练习'), ('exam', '模拟练习'), ('mistakes', '错题重练')]
+MODES = [('sequential', '顺序练习'), ('random', '随机练习'), ('review', '巩固练习'), ('exam', '模拟练习'), ('mistakes', '错题重练')]
 
 
 class Profile(models.Model):
@@ -103,6 +103,18 @@ class Mistake(models.Model):
     class Meta:
         ordering = ['-last_wrong_at']
         constraints = [models.UniqueConstraint(fields=['user', 'question'], name='unique_personal_mistake')]
+
+
+class QuestionProgress(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    sequential_done = models.BooleanField(default=False)
+    round_started_at = models.DateTimeField(null=True, blank=True)
+    attempts = models.PositiveIntegerField(default=0)
+    correct_streak = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['user', 'question'], name='unique_question_progress')]
 
 
 class LoginAttempt(models.Model):

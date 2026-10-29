@@ -19,7 +19,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 from .forms import AccountForm, StartForm
-from .models import Audit, CATEGORIES, KINDS, Item, LoginAttempt, Mistake, Profile, Question, Session
+from .models import Audit, CATEGORIES, KINDS, Item, LoginAttempt, Mistake, Profile, Question, Session, QuestionProgress
 from .services import answer_item, finish_session, start_session
 
 
@@ -91,7 +91,19 @@ def home(request):
     completed = items.filter(correct__isnull=False)
     counts = {r['category']: r['count'] for r in Question.objects.filter(enabled=True).values('category').annotate(count=Count('pk'))}
     boards = [{'key': k, 'name': n, 'count': counts.get(k, 0), 'description': d, 'index': f'0{i}'} for i, ((k, n), d) in enumerate(zip(CATEGORIES, ['承保与理赔，系统练习', '财产、责任与工程等险种', '健康保障与业务实务', '农业风险与政策实务']), 1)]
-    return page(request, 'home', {'nav': 'home', 'boards': boards, 'practiced': items.filter(answered_at__isnull=False).values('question_id').distinct().count(), 'accuracy': round(completed.filter(correct=True).count() / completed.count() * 100) if completed.exists() else None, 'graded_count': completed.count(), 'wrong_count': Mistake.objects.filter(user=request.user, active=True).count(), 'recent': request.user.session_set.filter(finished_at__isnull=True)[:3], 'total': sum(counts.values())})
+    scope_data = list(Question.objects.filter(enabled=True).values('category', 'subcategory', 'kind').annotate(total=Count('pk')))
+    progress = {(r['question__category'], r['question__subcategory'], r['question__kind']): r
+                for r in QuestionProgress.objects.filter(user=request.user, question__enabled=True)
+                .values('question__category', 'question__subcategory', 'question__kind')
+                .annotate(done=Count('pk', filter=Q(sequential_done=True)), mastered=Count('pk', filter=Q(correct_streak__gte=3)))}
+    for row in scope_data:
+        state = progress.get((row['category'], row['subcategory'], row['kind']), {})
+        row.update(done=state.get('done', 0), mastered=state.get('mastered', 0))
+    selected = [r for r in scope_data if r['category'] == 'auto']
+    initial = {k: sum(r[k] for r in selected) for k in ('total', 'done', 'mastered')}
+    initial['remaining'] = initial['total'] - initial['done']
+    recent = request.user.session_set.filter(finished_at__isnull=True).annotate(total_items=Count('items'), answered_items=Count('items', filter=Q(items__answered_at__isnull=False))).order_by('-created_at', '-pk')[:3]
+    return page(request, 'home', {'nav': 'home', 'boards': boards, 'scope_data': scope_data, 'initial_progress': initial, 'resume': recent[0] if recent else None, 'practiced': items.filter(answered_at__isnull=False).values('question_id').distinct().count(), 'accuracy': round(completed.filter(correct=True).count() / completed.count() * 100) if completed.exists() else None, 'graded_count': completed.count(), 'wrong_count': Mistake.objects.filter(user=request.user, active=True).count(), 'recent': recent, 'total': sum(counts.values())})
 
 
 @login_required
@@ -121,15 +133,16 @@ def session_view(request, pk):
             messages.info(request, f'{session.restored_mistakes} 道曾移除的错题再次答错，已重新加入错题本。')
     if session.finished_at:
         return redirect('result', pk=pk)
-    items = list(session.items.all())
+    items = list(session.items.values('pk', 'position', 'answered_at', 'correct'))
     try:
         position = int(request.GET.get('q', 0))
     except ValueError:
         position = 0
     if not 1 <= position <= len(items):
-        current = next((i for i in items if not i.answered_at), items[-1])
+        current_row = next((i for i in items if not i['answered_at']), items[-1])
     else:
-        current = items[position - 1]
+        current_row = items[position - 1]
+    current = session.items.get(pk=current_row['pk'])
     snap = current.snapshot
     revealed = current.answered_at is not None and session.mode != 'exam'
     # Build a deliberately safe object: no answers/analysis in exam templates or JSON.
@@ -138,8 +151,9 @@ def session_view(request, pk):
         question['options'] = {'T': '正确', 'F': '错误'}
     if revealed or snap['kind'] == 'short':
         question.update(answer=snap['answer'], reference=snap['reference'], explanation=snap['explanation'])
-    nav_items = [{'position': i.position, 'answered': i.answered_at is not None, 'correct': i.correct if session.mode != 'exam' else None} for i in items]
-    context = {'nav': 'home', 'practice': session, 'current': current, 'question': question, 'revealed': revealed, 'kind_label': dict(KINDS)[snap['kind']], 'category_label': dict(CATEGORIES)[snap['category']], 'items': nav_items, 'total': len(items), 'answered': sum(i.answered_at is not None for i in items), 'previous': max(1, current.position - 1), 'next': min(len(items), current.position + 1), 'progress': round(sum(i.answered_at is not None for i in items) / len(items) * 100), 'deadline': session.deadline.isoformat() if session.deadline else '', 'remaining_seconds': max(0, math.ceil((session.deadline - timezone.now()).total_seconds())) if session.deadline else 0}
+    nav_items = [{'position': i['position'], 'answered': i['answered_at'] is not None, 'correct': i['correct'] if session.mode != 'exam' else None} for i in items]
+    answered = sum(i['answered_at'] is not None for i in items)
+    context = {'nav': 'home', 'practice': session, 'current': current, 'question': question, 'revealed': revealed, 'kind_label': dict(KINDS)[snap['kind']], 'category_label': dict(CATEGORIES)[snap['category']], 'items': nav_items, 'total': len(items), 'answered': answered, 'previous': max(1, current.position - 1), 'next': min(len(items), current.position + 1), 'progress': round(answered / len(items) * 100), 'deadline': session.deadline.isoformat() if session.deadline else '', 'remaining_seconds': max(0, math.ceil((session.deadline - timezone.now()).total_seconds())) if session.deadline else 0}
     return page(request, 'session', context)
 
 
