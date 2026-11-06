@@ -13,7 +13,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Count, Q
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -154,6 +154,8 @@ def session_view(request, pk):
     nav_items = [{'position': i['position'], 'answered': i['answered_at'] is not None, 'correct': i['correct'] if session.mode != 'exam' else None} for i in items]
     answered = sum(i['answered_at'] is not None for i in items)
     context = {'nav': 'home', 'practice': session, 'current': current, 'question': question, 'revealed': revealed, 'kind_label': dict(KINDS)[snap['kind']], 'category_label': dict(CATEGORIES)[snap['category']], 'items': nav_items, 'total': len(items), 'answered': answered, 'previous': max(1, current.position - 1), 'next': min(len(items), current.position + 1), 'progress': round(answered / len(items) * 100), 'deadline': session.deadline.isoformat() if session.deadline else '', 'remaining_seconds': max(0, math.ceil((session.deadline - timezone.now()).total_seconds())) if session.deadline else 0}
+    if session.mode != 'exam':
+        context['current_mistake'] = Mistake.objects.filter(user=request.user, question_id=current.question_id).first()
     return page(request, 'session', context)
 
 
@@ -216,11 +218,24 @@ def mistakes(request):
 @login_required
 @require_POST
 def remove_mistake(request, pk):
-    mistake = get_object_or_404(Mistake, pk=pk, user=request.user)
-    mistake.active = False
-    mistake.removed_at = timezone.now()
-    mistake.save(update_fields=['active', 'removed_at'])
+    item = None
+    with transaction.atomic():
+        # Same per-user lock as answer submission, so removing and answering cannot lose each other's updates.
+        User.objects.select_for_update().get(pk=request.user.pk)
+        mistake = get_object_or_404(Mistake, pk=pk, user=request.user)
+        if 'item' in request.POST:
+            try:
+                item_id = int(request.POST['item'])
+            except (ValueError, TypeError):
+                raise Http404
+            item = get_object_or_404(Item.objects.exclude(session__mode='exam'), pk=item_id, session__user=request.user, question_id=mistake.question_id)
+        if mistake.active:
+            mistake.active = False
+            mistake.removed_at = timezone.now()
+            mistake.save(update_fields=['active', 'removed_at'])
     messages.success(request, '已从错题本移除，历史记录仍保留；再次答错会重新加入。')
+    if item:
+        return redirect(reverse('session', args=[item.session_id]) + f'?q={item.position}')
     return redirect('mistakes')
 
 

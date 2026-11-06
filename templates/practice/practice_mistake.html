@@ -1,0 +1,15 @@
+{% if current_mistake %}
+<section class="answer-feedback" aria-label="错题集管理">
+{% if current_mistake.active %}
+<h3>这道题在你的错题集中</h3>
+<p class="small muted">确认已掌握后可手动移出，历史作答仍保留；再次答错会重新加入。</p>
+<form method="post" action="{% url 'remove_mistake' current_mistake.pk %}" data-confirm="确认将这道题移出错题集？历史记录仍保留，再次答错会重新加入。">
+{% csrf_token %}<input type="hidden" name="item" value="{{ current.pk }}">
+<button class="button" type="submit">移出错题集</button>
+</form>
+{% else %}
+<h3>✓ 已移出错题集</h3>
+<p class="small muted">本次练习和历史作答保留，你可以继续下一题。再次答错会重新加入错题集。</p>
+{% endif %}
+</section>
+{% endif %}
